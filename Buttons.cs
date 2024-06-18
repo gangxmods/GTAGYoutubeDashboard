@@ -3,28 +3,26 @@ using UnityEngine;
 
 namespace YoutubeDashboard
 {
-
-    public class VButton1: GorillaPressableButton
+    public class VButton1 : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
 
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -32,35 +30,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.VideoButton1();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.VideoButton1();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class VButton2 : GorillaPressableButton
+    public class VButton2 : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
 
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -68,34 +65,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.VideoButton2();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.VideoButton2();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class VButton3 : GorillaPressableButton
+    public class VButton3 : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -103,34 +100,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.VideoButton3();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.VideoButton3();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class VButton4 : GorillaPressableButton
+    public class VButton4 : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -138,33 +135,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.VideoButton4();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.VideoButton4();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
-    public class VButton5 : GorillaPressableButton
-    {
-        public Material pressedMat;
-        public Material unpressedMat;
 
+    public class VButton5 : MonoBehaviour
+    {
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -172,74 +170,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.VideoButton5();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.VideoButton5();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class Forward : GorillaPressableButton
+    public class Forward : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
-                }
-            }          
-        }
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
 
-        private IEnumerator Press()
-        {
-            CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.Forward();
-            Plugin.VButton1.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton2.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton3.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton4.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton5.GetComponent<Renderer>().material = unpressedMat;
-            yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-            CD = false;
-        }
-    }
-
-    public class Mute : GorillaPressableButton
-    {
-        public Material pressedMat;
-        public Material unpressedMat;
-
-        public bool CD = false;
-
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
-        private void OnTriggerEnter(Collider collider)
-        {
-            if (!Plugin.CD2)
-            {
-                if (!CD)
-                {
-                    StartCoroutine(Press());
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -247,34 +205,39 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.Mute();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.Forward();
+            Plugin.Instance.VButton1.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton2.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton3.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton4.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton5.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class FastForward : GorillaPressableButton
+    public class Mute : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD2)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -282,34 +245,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.FastForwardPress();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.Mute();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class Rewind : GorillaPressableButton
+    public class FastForward : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD2)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -317,34 +280,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.RewindPress();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.FastForwardPress();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class Play : GorillaPressableButton
+    public class Rewind : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD2)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -352,36 +315,34 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.Play();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.RewindPress();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-
-
-    public class Pause : GorillaPressableButton
+    public class Play : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD2)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
-                if (!CD)
+                if (!Plugin.Instance.CD)
                 {
-                    StartCoroutine(Press());
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
                 }
             }
         }
@@ -389,80 +350,117 @@ namespace YoutubeDashboard
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.Pause();
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.Play();
             yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
             CD = false;
         }
     }
 
-    public class Backward : GorillaPressableButton
+    public class Pause : MonoBehaviour
     {
-        public Material pressedMat;
-        public Material unpressedMat;
-
         public bool CD = false;
 
-        public void Awake()
-        {
-            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-        }
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
+            {
+                if (!Plugin.Instance.CD)
+                {
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
+                }
+            }
+        }
+
+        private IEnumerator Press()
+        {
+            CD = true;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.Pause();
+            yield return new WaitForSeconds(0.25f);
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            CD = false;
+        }
+    }
+
+    public class Backward : MonoBehaviour
+    {
+        public bool CD = false;
+
+        public void Awake() => transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+
+        private void OnTriggerEnter(Collider collider)
+        {
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
+            {
+                if (!Plugin.Instance.CD)
+                {
+                    if (!CD)
+                    {
+                        Plugin.Instance.LastPress = Time.time;
+
+                        StartCoroutine(Press());
+                        GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                        GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
+                    }
+                }
+            }
+        }
+
+        private IEnumerator Press()
+        {
+            CD = true;
+            transform.GetComponent<Renderer>().material = Plugin.Instance.pressedMat;
+            Plugin.Instance.Backward();
+            Plugin.Instance.VButton1.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton2.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton3.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton4.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton5.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            yield return new WaitForSeconds(0.25f);
+            transform.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            CD = false;
+        }
+    }
+
+    public class YTlogo : MonoBehaviour
+    {
+        public bool CD = false;
+
+        private void OnTriggerEnter(Collider collider)
+        {
+            if (collider.TryGetComponent<GorillaTriggerColliderHandIndicator>(out GorillaTriggerColliderHandIndicator component) && Time.time > Plugin.Instance.LastPress + Plugin.Debounce)
             {
                 if (!CD)
                 {
+                    Plugin.Instance.LastPress = Time.time;
+
                     StartCoroutine(Press());
+                    GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, component.isLeftHand, 0.05f);
+                    GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength / 1, GorillaTagger.Instance.tapHapticDuration / 1);
                 }
-            }   
+            }
         }
 
         private IEnumerator Press()
         {
             CD = true;
-            transform.GetComponent<Renderer>().material = this.pressedMat;
-            Plugin.Backward();
-            Plugin.VButton1.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton2.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton3.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton4.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton5.GetComponent<Renderer>().material = unpressedMat;
-            yield return new WaitForSeconds(0.25f);
-            transform.GetComponent<Renderer>().material = this.unpressedMat;
-            CD = false;
-        }
-    }
-
-    public class YTlogo : GorillaPressableButton
-    {
-        public Material unpressedMat;
-        public bool CD = false;
-
-        public void Awake()
-        {
-            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
-        }
-        private void OnTriggerEnter(Collider collider)
-        {
-            if (!CD)
-            {
-                StartCoroutine(Press());
-            }          
-        }
-
-        private IEnumerator Press()
-        {
-            CD = true;
-            Plugin.VButton1.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton2.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton3.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton4.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.VButton5.GetComponent<Renderer>().material = unpressedMat;
-            Plugin.YTHit();
+            Plugin.Instance.VButton1.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton2.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton3.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton4.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.VButton5.GetComponent<Renderer>().material = Plugin.Instance.unpressedMat;
+            Plugin.Instance.YTHit();
             yield return new WaitForSeconds(0.25f);
             CD = false;
         }
