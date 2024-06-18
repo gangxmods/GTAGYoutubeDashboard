@@ -614,7 +614,7 @@ namespace YoutubeDashboard
                 { "video_id", videoId }
             };
         }
-        public static async void LoadAssets()
+        public static void LoadAssets()
         {
             AssetBundle bundle = LoadAssetBundle("YoutubeDashboard.yt");
             YoutubeDashboard = bundle.LoadAsset<GameObject>("YT");
