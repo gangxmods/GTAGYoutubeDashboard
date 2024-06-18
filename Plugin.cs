@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using BepInEx;
@@ -66,7 +66,10 @@ namespace YoutubeDashboard
         public static GameObject pauseLogo;
         public static GameObject playLogo;
         public static GameObject MuteLogo;
-
+        public static GameObject FastForward;
+        public static GameObject Rewind;
+        public static GameObject FastForwardLogo;
+        public static GameObject RewindLogo;
 
 
 
@@ -74,6 +77,7 @@ namespace YoutubeDashboard
         public static bool doonce = false;
         public static bool doOnce = false;
         public static bool CD = false;
+        public static bool CD2 = false;
         public static Plugin instance;
         public static List<string> YTVideoNames = new List<string>();
         public static List<string> YTVideoIds = new List<string>();
@@ -160,35 +164,42 @@ namespace YoutubeDashboard
             YoutubeDashboard.gameObject.transform.rotation = Quaternion.Euler(0f, 337.7857f, 0f);
             YoutubeDashboard.gameObject.transform.localScale = new Vector3(3f, 3f, 3f);
 
+
             //buttons ETC
-             BASE = GameObject.Find("BASE");
-             VButton1 = GameObject.Find("BTN");
-             VButton2 = GameObject.Find("BTN2");
-             VButton3 = GameObject.Find("BTN3");
-             VButton4 = GameObject.Find("BTN4");
-             VButton5 = GameObject.Find("BTN5");
-             YTLogo = GameObject.Find("YTLogo");
-             Forwardd = GameObject.Find("Forward");
-             Backwardd = GameObject.Find("Backward");
-             PauseBTN = GameObject.Find("PauseBTN");
-             PlayBTN = GameObject.Find("PlayBTN");
-             MuteBTN = GameObject.Find("MuteBTN");
-             VPH = GameObject.Find("VPH");
-             VPH2 = GameObject.Find("VPH2");
-             VPH3 = GameObject.Find("VPH3");
-             VPH4 = GameObject.Find("VPH4");
-             VPH5 = GameObject.Find("VPH5");
-             YTPlayerTXT = GameObject.Find("YTPlayerTXT");
-             PFP = GameObject.Find("PFP");
-             F = GameObject.Find(">");
-             B = GameObject.Find("<");
-             MainTXT = GameObject.Find("MainTXT");
-             divider = GameObject.Find("divider");
-             pauseLogo = GameObject.Find("pauseLogo");
-             playLogo = GameObject.Find("playLogo");
-             MuteLogo = GameObject.Find("MuteLogo");
-             LoadButtons();
-             LoadVideoTitles();
+            BASE = GameObject.Find("BASE");
+            VButton1 = GameObject.Find("BTN");
+            VButton2 = GameObject.Find("BTN2");
+            VButton3 = GameObject.Find("BTN3");
+            VButton4 = GameObject.Find("BTN4");
+            VButton5 = GameObject.Find("BTN5");
+            YTLogo = GameObject.Find("YTLogo");
+            Forwardd = GameObject.Find("Forward");
+            Backwardd = GameObject.Find("Backward");
+            PauseBTN = GameObject.Find("PauseBTN");
+            PlayBTN = GameObject.Find("PlayBTN");
+            MuteBTN = GameObject.Find("MuteBTN");
+            FastForward = GameObject.Find("FastForward");
+            Rewind = GameObject.Find("Rewind");
+            VPH = GameObject.Find("VPH");
+            VPH2 = GameObject.Find("VPH2");
+            VPH3 = GameObject.Find("VPH3");
+            VPH4 = GameObject.Find("VPH4");
+            VPH5 = GameObject.Find("VPH5");
+            YTPlayerTXT = GameObject.Find("YTPlayerTXT");
+            PFP = GameObject.Find("PFP");
+            F = GameObject.Find(">");
+            B = GameObject.Find("<");
+            MainTXT = GameObject.Find("MainTXT");
+            divider = GameObject.Find("divider");
+            pauseLogo = GameObject.Find("pauseLogo");
+            playLogo = GameObject.Find("playLogo");
+            MuteLogo = GameObject.Find("MuteLogo");
+            FastForwardLogo = GameObject.Find("FastForwardLogo");
+            RewindLogo = GameObject.Find("RewindLogo");
+            BASE.gameObject.transform.localScale = new Vector3(-BASE.gameObject.transform.localScale.x, BASE.gameObject.transform.localScale.y, BASE.gameObject.transform.localScale.z);
+            LoadButtons();
+            LoadVideoTitles();
+
             //SETTING
             if (username.Value.ToString() == "NONE SET")
             {
@@ -603,7 +614,7 @@ namespace YoutubeDashboard
                 { "video_id", videoId }
             };
         }
-        public static void LoadAssets()
+        public static async void LoadAssets()
         {
             AssetBundle bundle = LoadAssetBundle("YoutubeDashboard.yt");
             YoutubeDashboard = bundle.LoadAsset<GameObject>("YT");
@@ -621,6 +632,8 @@ namespace YoutubeDashboard
             PauseBTN.AddComponent<Pause>();
             PlayBTN.AddComponent<Play>();
             MuteBTN.AddComponent<Mute>();
+            FastForward.AddComponent<FastForward>();
+            Rewind.AddComponent<Rewind>();
             YTLogo.AddComponent<YTlogo>();
             BASE.AddComponent<VideoPlayer>();
             BASE.AddComponent<AudioSource>();
@@ -635,6 +648,8 @@ namespace YoutubeDashboard
             PauseBTN.layer = 18;
             PlayBTN.layer = 18;
             MuteBTN.layer = 18;
+            FastForward.layer = 18;
+            Rewind.layer = 18;
             YTLogo.layer = 18;
         }
 
@@ -700,6 +715,13 @@ namespace YoutubeDashboard
             CD = false;
         }
 
+        private static IEnumerator VideoInteractableCDRun()
+        {
+            CD2 = true;
+            yield return new WaitForSeconds(.7f);
+            CD2 = false;
+        }
+
         public static IEnumerator UpdateHome(bool isHome)
         {
             yield return new WaitForSeconds(0.35f);
@@ -726,9 +748,14 @@ namespace YoutubeDashboard
             PauseBTN.SetActive(!isHome);
             PlayBTN.SetActive(!isHome);
             MuteBTN.SetActive(!isHome);
+            FastForward.SetActive(!isHome);
+            Rewind.SetActive(!isHome);
             pauseLogo.SetActive(!isHome);
             playLogo.SetActive(!isHome);
             MuteLogo.SetActive(!isHome);
+            FastForwardLogo.SetActive(!isHome);
+            RewindLogo.SetActive(!isHome);
+
             if (isHome == true)
             {
                 BASE.GetComponent<VideoPlayer>().renderMode = VideoRenderMode.RenderTexture;
@@ -742,7 +769,7 @@ namespace YoutubeDashboard
 
         public static void Mute()
         {
-            if (!CD)
+            if (!CD2)
             {
                 mute = !mute;
                 if (mute)
@@ -753,27 +780,45 @@ namespace YoutubeDashboard
                 {
                     BASE.GetComponent<VideoPlayer>().SetDirectAudioMute(0, false);
                 }
-                instance.StartCoroutine(CDRun());
+                instance.StartCoroutine(VideoInteractableCDRun());
+            }
+        }
+
+        public static void FastForwardPress()
+        {
+            if (!CD2)
+            {
+                BASE.GetComponent<VideoPlayer>().time += 5f;
+                instance.StartCoroutine(VideoInteractableCDRun());
+            }
+        }
+
+        public static void RewindPress()
+        {
+            if (!CD2)
+            {
+                BASE.GetComponent<VideoPlayer>().time -= 5f;
+                instance.StartCoroutine(VideoInteractableCDRun());
             }
         }
 
         public static void Pause()
         {
-            if (!CD)
+            if (!CD2)
             {
                 BASE.GetComponent<AudioSource>().Pause();
                 BASE.GetComponent<VideoPlayer>().Pause();
-                instance.StartCoroutine(CDRun());
+                instance.StartCoroutine(VideoInteractableCDRun());
             }
         }
 
         public static void Play()
         {
-            if (!CD)
+            if (!CD2)
             {
                 BASE.GetComponent<AudioSource>().Play();
                 BASE.GetComponent<VideoPlayer>().Play();
-                instance.StartCoroutine(CDRun());
+                instance.StartCoroutine(VideoInteractableCDRun());
             }
         }
 
@@ -848,8 +893,6 @@ namespace YoutubeDashboard
                 LoadVideoTitles();
             }
         }
-
-
 
     }
 }
