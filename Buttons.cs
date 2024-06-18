@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 namespace YoutubeDashboard
@@ -195,10 +195,13 @@ namespace YoutubeDashboard
         }
         private void OnTriggerEnter(Collider collider)
         {
+            if (!Plugin.CD)
+            {
                 if (!CD)
                 {
                     StartCoroutine(Press());
-                }           
+                }
+            }          
         }
 
         private IEnumerator Press()
@@ -216,6 +219,7 @@ namespace YoutubeDashboard
             CD = false;
         }
     }
+
     public class Mute : GorillaPressableButton
     {
         public Material pressedMat;
@@ -231,7 +235,7 @@ namespace YoutubeDashboard
         }
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (!Plugin.CD2)
             {
                 if (!CD)
                 {
@@ -245,6 +249,76 @@ namespace YoutubeDashboard
             CD = true;
             transform.GetComponent<Renderer>().material = this.pressedMat;
             Plugin.Mute();
+            yield return new WaitForSeconds(0.25f);
+            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            CD = false;
+        }
+    }
+
+    public class FastForward : GorillaPressableButton
+    {
+        public Material pressedMat;
+        public Material unpressedMat;
+
+        public bool CD = false;
+
+        public void Awake()
+        {
+            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
+            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
+            transform.GetComponent<Renderer>().material = this.unpressedMat;
+        }
+        private void OnTriggerEnter(Collider collider)
+        {
+            if (!Plugin.CD2)
+            {
+                if (!CD)
+                {
+                    StartCoroutine(Press());
+                }
+            }
+        }
+
+        private IEnumerator Press()
+        {
+            CD = true;
+            transform.GetComponent<Renderer>().material = this.pressedMat;
+            Plugin.FastForwardPress();
+            yield return new WaitForSeconds(0.25f);
+            transform.GetComponent<Renderer>().material = this.unpressedMat;
+            CD = false;
+        }
+    }
+
+    public class Rewind : GorillaPressableButton
+    {
+        public Material pressedMat;
+        public Material unpressedMat;
+
+        public bool CD = false;
+
+        public void Awake()
+        {
+            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
+            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
+            transform.GetComponent<Renderer>().material = this.unpressedMat;
+        }
+        private void OnTriggerEnter(Collider collider)
+        {
+            if (!Plugin.CD2)
+            {
+                if (!CD)
+                {
+                    StartCoroutine(Press());
+                }
+            }
+        }
+
+        private IEnumerator Press()
+        {
+            CD = true;
+            transform.GetComponent<Renderer>().material = this.pressedMat;
+            Plugin.RewindPress();
             yield return new WaitForSeconds(0.25f);
             transform.GetComponent<Renderer>().material = this.unpressedMat;
             CD = false;
@@ -266,7 +340,7 @@ namespace YoutubeDashboard
         }
         private void OnTriggerEnter(Collider collider)
         {
-            if (!Plugin.CD)
+            if (!Plugin.CD2)
             {
                 if (!CD)
                 {
@@ -286,6 +360,8 @@ namespace YoutubeDashboard
         }
     }
 
+
+
     public class Pause : GorillaPressableButton
     {
         public Material pressedMat;
@@ -301,10 +377,13 @@ namespace YoutubeDashboard
         }
         private void OnTriggerEnter(Collider collider)
         {
-            if (!CD)
+            if (!Plugin.CD2)
             {
-                StartCoroutine(Press());
-            }       
+                if (!CD)
+                {
+                    StartCoroutine(Press());
+                }
+            }
         }
 
         private IEnumerator Press()
@@ -333,10 +412,13 @@ namespace YoutubeDashboard
         }
         private void OnTriggerEnter(Collider collider)
         {
-            if (!CD)
+            if (!Plugin.CD)
             {
-                StartCoroutine(Press());
-            }    
+                if (!CD)
+                {
+                    StartCoroutine(Press());
+                }
+            }   
         }
 
         private IEnumerator Press()
@@ -385,6 +467,4 @@ namespace YoutubeDashboard
             CD = false;
         }
     }
-
-
 }
