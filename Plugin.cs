@@ -2,170 +2,114 @@ using System;
 using System.IO;
 using System.Reflection;
 using BepInEx;
-using HarmonyLib;
 using UnityEngine;
-using Utilla;
-using UnityEngine.Networking;
 using Newtonsoft.Json;
-using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Photon.Pun;
 using BepInEx.Configuration;
-using BuildSafe;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
-using UnityEngine.InputSystem;
-using System.Threading.Tasks;
 using System.Net;
-using System.Drawing;
 using System.Text;
 using WebSocketSharp;
 using UnityEngine.Video;
-using Steamworks;
-using PlayFab.ProfilesModels;
+using UnityEngine.Networking;
 
 namespace YoutubeDashboard
 {
-    /// <summary>
-    /// This is your mod's main class.
-    /// </summary>
-
-    /* This attribute tells Utilla to look for [ModdedGameJoin] and [ModdedGameLeave] */
-    [ModdedGamemode]
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
-    [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.13")]
+    [BepInPlugin(Constants.GUID, Constants.Name, Constants.Version)]
     public class Plugin : BaseUnityPlugin
     {
-        public static GameObject YoutubeDashboard;
-        public static GameObject BASE;
-        public static GameObject VButton1;
-        public static GameObject VButton2;
-        public static GameObject VButton3;
-        public static GameObject VButton4;
-        public static GameObject VButton5;
-        public static GameObject YTLogo;
-        public static GameObject Forwardd;
-        public static GameObject Backwardd;
-        public static GameObject PauseBTN;
-        public static GameObject PlayBTN;
-        public static GameObject MuteBTN;
-        public static GameObject VPH;
-        public static GameObject VPH2;
-        public static GameObject VPH3;
-        public static GameObject VPH4;
-        public static GameObject VPH5;
-        public static GameObject YTPlayerTXT;
-        public static GameObject PFP;
-        public static GameObject F;
-        public static GameObject B;
-        public static GameObject MainTXT;
-        public static GameObject divider;
-        public static GameObject pauseLogo;
-        public static GameObject playLogo;
-        public static GameObject MuteLogo;
-        public static GameObject FastForward;
-        public static GameObject Rewind;
-        public static GameObject FastForwardLogo;
-        public static GameObject RewindLogo;
+        public static Plugin Instance { get; private set; }
 
+        public GameObject YoutubeDashboard;
+        public GameObject BASE;
+        public GameObject VButton1;
+        public GameObject VButton2;
+        public GameObject VButton3;
+        public GameObject VButton4;
+        public GameObject VButton5;
+        public GameObject YTLogo;
+        public GameObject ForwardBTN;
+        public GameObject BackwardBTN;
+        public GameObject PauseBTN;
+        public GameObject PlayBTN;
+        public GameObject MuteBTN;
+        public GameObject VPH;
+        public GameObject VPH2;
+        public GameObject VPH3;
+        public GameObject VPH4;
+        public GameObject VPH5;
+        public GameObject YTPlayerTXT;
+        public GameObject PFP;
+        public GameObject F;
+        public GameObject B;
+        public GameObject MainTXT;
+        public GameObject Divider;
+        public GameObject PauseLogo;
+        public GameObject PlayLogo;
+        public GameObject MuteLogo;
+        public GameObject FastForward;
+        public GameObject Rewind;
+        public GameObject FastForwardLogo;
+        public GameObject RewindLogo;
+        
+        public bool CD = false;
+        public bool CD2 = false;
+        public bool mute = false;
 
+        public List<string> YTVideoNames = new List<string>();
+        public List<string> YTVideoIds = new List<string>();
 
-        public static bool inModded = false;
-        public static bool doonce = false;
-        public static bool doOnce = false;
-        public static bool CD = false;
-        public static bool CD2 = false;
-        public static Plugin instance;
-        public static List<string> YTVideoNames = new List<string>();
-        public static List<string> YTVideoIds = new List<string>();
-        public static int YTVidIndex = 0;
-        public static string ChannelName;
-        public static string YTPFPLink;
-        public static string SubscriberCount;
-        public static string TotalVideos;
-        public static string VidAMT;
-        public static string TotalViews;
-        public static string TotalVIDS;
-        public static string AvrgViews;
-        public static string PFPP;
-        public static List<JToken> videos = new List<JToken>();
-        private static string apiKey;
-        private static string continuationToken;
-        private static string clickTrackingParams;
-        private static JToken client;
-        public static JObject data;
-        private static string clientVersion;
-        public static int count;
-        public static ConfigEntry<string> username;
-        public static bool mute = false;
-        public static bool isHome = true;
+        private JToken client;
+        public JObject data;
 
-        void Start()
+        public int YTVidIndex = 0;
+
+        public const float Debounce = 0.25f;
+        public float LastPress;
+
+        public string SubscriberCount;
+        public string TotalVideos;
+        public string TotalViews;
+        public string AvrgViews;
+        public string PFPP;
+        private string apiKey;
+        private string continuationToken;
+        private string clickTrackingParams;
+
+        public ConfigEntry<string> username;
+
+        public Material pressedMat;
+        public Material unpressedMat;
+
+        private void Start()
         {
-            /* A lot of Gorilla Tag systems will not be set up when start is called */
-            /* Put code in OnGameInitialized to avoid null references */
-            username = Config.Bind<string>(
-            "General",
-            "Username",
-            "NONE SET",
-            "The Username That Will Appear Ingame");
-
+            username = Config.Bind<string>("General", "Username", "NONE SET", "The Username That Will Appear Ingame");
 
             string url = $"https://youtube.com/@{username.Value}";
             
-            instance = this;
+            if (Instance != this)
+                Instance = this;
             LoadAssets();
-            instance.StartCoroutine(GetInfo($"{url}/about"));
-            instance.StartCoroutine(LoadYTProfileCoroutine($"{url}/videos?view=0&flow=grid"));
-            Utilla.Events.GameInitialized += OnGameInitialized;
+            StartCoroutine(GetInfo($"{url}/about"));
+            StartCoroutine(LoadYTProfileCoroutine($"{url}/videos?view=0&flow=grid"));
+            GorillaTagger.OnPlayerSpawned(OnGameInitialized);
         }
 
-        [ModdedGamemodeJoin]
-        public void OnJoin(string gamemode)
+        private void OnGameInitialized()
         {
-            /* Activate your mod here */
-            /* This code will run regardless of if the mod is enabled */
-            inModded = true;
-        }
-
-
-        [ModdedGamemodeLeave]
-        public void OnLeave(string gamemode)
-        {
-            /* Deactivate your mod here */
-            /* This code will run regardless of if the mod is enabled */
-            inModded = false;
-        }
-
-        void OnEnable()
-        {
-            /* Set up your mod here */
-            /* Code here runs at the start and whenever your mod is enabled */
-            HarmonyPatches.ApplyHarmonyPatches();
-        }
-
-        void OnDisable()
-        {
-            /* Undo mod setup here */
-            /* This provides support for toggling mods with ComputerInterface, please implement it :) */
-            /* Code here runs whenever your mod is disabled (including if it disabled on startup) */
-            HarmonyPatches.RemoveHarmonyPatches();
-        }
-
-        void OnGameInitialized(object sender, EventArgs e)
-        {
-            //board
+            // Board
             YoutubeDashboard = Instantiate(YoutubeDashboard);
             YoutubeDashboard.SetActive(true);
             YoutubeDashboard.gameObject.transform.localPosition = new Vector3(-73.6326f, 10.8116f, - 84.9893f);
             YoutubeDashboard.gameObject.transform.rotation = Quaternion.Euler(0f, 337.7857f, 0f);
             YoutubeDashboard.gameObject.transform.localScale = new Vector3(3f, 3f, 3f);
+            StartCoroutine(UpdateHome(true));
 
-
-            //buttons ETC
+            // Buttons ETC
             BASE = GameObject.Find("BASE");
             VButton1 = GameObject.Find("BTN");
             VButton2 = GameObject.Find("BTN2");
@@ -173,8 +117,8 @@ namespace YoutubeDashboard
             VButton4 = GameObject.Find("BTN4");
             VButton5 = GameObject.Find("BTN5");
             YTLogo = GameObject.Find("YTLogo");
-            Forwardd = GameObject.Find("Forward");
-            Backwardd = GameObject.Find("Backward");
+            ForwardBTN = GameObject.Find("Forward");
+            BackwardBTN = GameObject.Find("Backward");
             PauseBTN = GameObject.Find("PauseBTN");
             PlayBTN = GameObject.Find("PlayBTN");
             MuteBTN = GameObject.Find("MuteBTN");
@@ -190,9 +134,9 @@ namespace YoutubeDashboard
             F = GameObject.Find(">");
             B = GameObject.Find("<");
             MainTXT = GameObject.Find("MainTXT");
-            divider = GameObject.Find("divider");
-            pauseLogo = GameObject.Find("pauseLogo");
-            playLogo = GameObject.Find("playLogo");
+            Divider = GameObject.Find("divider");
+            PauseLogo = GameObject.Find("pauseLogo");
+            PlayLogo = GameObject.Find("playLogo");
             MuteLogo = GameObject.Find("MuteLogo");
             FastForwardLogo = GameObject.Find("FastForwardLogo");
             RewindLogo = GameObject.Find("RewindLogo");
@@ -200,20 +144,23 @@ namespace YoutubeDashboard
             LoadButtons();
             LoadVideoTitles();
 
-            //SETTING
+            pressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = Color.red };
+            unpressedMat = new Material(Shader.Find("GorillaTag/UberShader")) { color = new Color(164f, 158f, 158f, 255f) };
+
+            // SETTING
             if (username.Value.ToString() == "NONE SET")
             {
                 MainTXT.GetComponent<TextMesh>().text = $"Set Username In BepInEx \nConfig File";
             }
             else
             {
-                MainTXT.GetComponent<TextMesh>().text = $"CHANNEL: {username.Value.ToString()}\nSubscriber Count: {SubscriberCount.Replace("subscribers", "")}\nTotal Videos: {TotalVideos:N0}\nTotal Views: {TotalViews:N0}\nAverage Views: {AvrgViews:N0}";
+                MainTXT.GetComponent<TextMesh>().text = $"CHANNEL: {username.Value}\nSubscriber Count: {SubscriberCount.Replace("subscribers", "")}\nTotal Videos: {TotalVideos:N0}\nTotal Views: {TotalViews:N0}\nAverage Views: {AvrgViews:N0}";
                 Material pfpMat = CustomImage(PFPP);
                 PFP.GetComponent<Renderer>().material = pfpMat;
             }
         }
 
-        public static IEnumerator GetInfo(string link)
+        public IEnumerator GetInfo(string link)
         {
             UnityWebRequest www = UnityWebRequest.Get(link);
             yield return www.SendWebRequest();
@@ -263,50 +210,51 @@ namespace YoutubeDashboard
             Debug.Log($"PFP: {pfp}");
             Debug.Log($"Average Views: {avrgviews:N0}");
 
-            //SETTING
+            // SETTING
             if (username.Value.ToString() == "NONE SET")
             {
                 MainTXT.GetComponent<TextMesh>().text = $"Set Username In BepInEx \nConfig File";
             }
             else
             {
-                MainTXT.GetComponent<TextMesh>().text = $"CHANNEL: {username.Value.ToString()}\nSubscriber Count: {SubscriberCount.Replace("subscribers", "")}\nTotal Videos: {TotalVideos:N0}\nTotal Views: {TotalViews:N0}\nAverage Views: {AvrgViews:N0}";
+                MainTXT.GetComponent<TextMesh>().text = $"CHANNEL: {username.Value}\nSubscriber Count: {SubscriberCount.Replace("subscribers", "")}\nTotal Videos: {TotalVideos:N0}\nTotal Views: {TotalViews:N0}\nAverage Views: {AvrgViews:N0}";
                 Material pfpMat = CustomImage(PFPP);
                 PFP.GetComponent<Renderer>().material = pfpMat;
             }
         }
 
-        public static Material CustomImage(string url)
+        public Material CustomImage(string url)
         {
             Material material = null;
             try
             {
-                using (WebClient webClient = new WebClient())
+                using WebClient webClient = new WebClient();
+
+                byte[] array = webClient.DownloadData(url);
+                if (array != null && array.Length != 0)
                 {
-                    byte[] array = webClient.DownloadData(url);
-                    if (array != null && array.Length != 0)
+                    material = new Material(Shader.Find("GorillaTag/UberShader"))
                     {
-                        material = new Material(Shader.Find("GorillaTag/UberShader"));
-                        material.shaderKeywords = new string[]
+                        shaderKeywords = new string[]
                         {
-                            "_USE_TEXTURE"
-                        };
-                        Texture2D texture2D = new Texture2D(2, 2);
-                        bool flag2 = texture2D.LoadImage(array);
-                        if (flag2)
-                        {
-                            material.mainTexture = texture2D;
-                            texture2D.Apply();
+                                "_USE_TEXTURE"
                         }
-                        else
-                        {
-                            Debug.LogError("Failed: " + url);
-                        }
+                    };
+                    Texture2D texture2D = new Texture2D(2, 2);
+                    bool flag2 = texture2D.LoadImage(array);
+                    if (flag2)
+                    {
+                        material.mainTexture = texture2D;
+                        texture2D.Apply();
                     }
                     else
                     {
-                        Debug.LogError("Empty: " + url);
+                        Debug.LogError("Failed: " + url);
                     }
+                }
+                else
+                {
+                    Debug.LogError("Empty: " + url);
                 }
             }
             catch (Exception ex)
@@ -335,7 +283,7 @@ namespace YoutubeDashboard
                     client = JObject.Parse(clientMatch.Groups[0].Value + "}")["client"];
 
                     var clientVersionMatch = Regex.Match(html, @"""clientVersion"":""(.*?)""");
-                    clientVersion = clientVersionMatch.Groups[1].Value;
+                    _ = clientVersionMatch.Groups[1].Value;
 
                     var apiKeyMatch = Regex.Match(html, @"""innertubeApiKey"":""(.*?)""");
                     apiKey = apiKeyMatch.Groups[1].Value;
@@ -357,8 +305,8 @@ namespace YoutubeDashboard
                     {
                         context = new
                         {
-                            clickTracking = new { clickTrackingParams = clickTrackingParams },
-                            client = client
+                            clickTracking = new { clickTrackingParams },
+                            client
                         },
                         continuation = continuationToken
                     };
@@ -388,11 +336,6 @@ namespace YoutubeDashboard
 
                         YTVideoIds.Add(videoId);
                         YTVideoNames.Add(videoTitle);
-
-                       // Debug.Log(videoId);
-                       // Debug.Log(videoTitle);
-                       // Debug.Log(videoData["richItemRenderer"]["content"]["videoRenderer"]["viewCountText"]["simpleText"]);
-                       // Debug.Log(videoData["richItemRenderer"]["content"]["videoRenderer"]["thumbnail"]["thumbnails"][0]["url"]);
                     }
                 }
                 catch
@@ -408,11 +351,6 @@ namespace YoutubeDashboard
 
                                 YTVideoIds.Add(videoId);
                                 YTVideoNames.Add(videoTitle);
-
-                               // Debug.Log(videoId);
-                               // Debug.Log(videoTitle);
-                               // Debug.Log(video["richItemRenderer"]["content"]["videoRenderer"]["viewCountText"]["simpleText"]);
-                               // Debug.Log(video["richItemRenderer"]["content"]["videoRenderer"]["thumbnail"]["thumbnails"][0]["url"]);
                             }
                         }
                     }
@@ -427,11 +365,6 @@ namespace YoutubeDashboard
 
                                 YTVideoIds.Add(videoId);
                                 YTVideoNames.Add(videoTitle);
-
-                               // Debug.Log(videoId);
-                               // Debug.Log(videoTitle);
-                               // Debug.Log(videoData["richItemRenderer"]["content"]["videoRenderer"]["viewCountText"]["simpleText"]);
-                                //Debug.Log(videoData["richItemRenderer"]["content"]["videoRenderer"]["thumbnail"]["thumbnails"][0]["url"]);
                             }
                         }
                         catch
@@ -445,7 +378,7 @@ namespace YoutubeDashboard
                     Debug.Log("No more continuation tokens. Loading Rest Of Profile");
                     LoadButtons();
                     LoadVideoTitles();
-                    instance.StartCoroutine(UpdateHome(true));   
+                    StartCoroutine(UpdateHome(true));   
                     break;
                 }
 
@@ -453,54 +386,8 @@ namespace YoutubeDashboard
             }
             Debug.Log("Total videos loaded: " + YTVideoIds.Count);
         }
-    
-        private static string GetHtml(HttpClient client, string url)
-        {
-            var response = client.GetAsync(url).Result;
-            return response.Content.ReadAsStringAsync().Result;
-        }
 
-        private static string PostJson(HttpClient client, string url, HttpContent content)
-        {
-            var response = client.PostAsync(url, content).Result;
-            return response.Content.ReadAsStringAsync().Result;
-        }
-
-        private static List<JToken> SearchDict(JToken partial, string searchKey)
-        {
-            List<JToken> results = new List<JToken>();
-            Queue<JToken> stack = new Queue<JToken>();
-            stack.Enqueue(partial);
-
-            while (stack.Count > 0)
-            {
-                var currentItem = stack.Dequeue();
-                if (currentItem.Type == JTokenType.Object)
-                {
-                    foreach (var property in currentItem.Children<JProperty>())
-                    {
-                        if (property.Name == searchKey)
-                        {
-                            results.Add(property.Value);
-                        }
-                        else
-                        {
-                            stack.Enqueue(property.Value);
-                        }
-                    }
-                }
-                else if (currentItem.Type == JTokenType.Array)
-                {
-                    foreach (var item in currentItem.Children())
-                    {
-                        stack.Enqueue(item);
-                    }
-                }
-            }
-            return results;
-        }
-
-        static void PlayVideo(string videoId)
+        private void PlayVideo(string videoId)
         {
             string[] urlList = new string[] { };
             string[] unsortedList = new string[] { };
@@ -536,7 +423,7 @@ namespace YoutubeDashboard
             match = Regex.Match(jsonResponse, pattern);
             string title = match.Groups[1].Value;
             MatchCollection matches = Regex.Matches(jsonResponse, "\"url\":\\s+\"([^\"]+)\"");
-            foreach (Match m in matches)
+            foreach (Match m in matches.Cast<Match>())
             {
                 urlList = urlList.Append(m.Groups[1].Value).ToArray();
             }
@@ -577,10 +464,7 @@ namespace YoutubeDashboard
                 }
             }).ToArray();
             string choice = unsortedList.FirstOrDefault(x => x.Contains("video%2Fmp4"));
-            if (choice == null)
-            {
-                choice = unsortedList.FirstOrDefault();
-            }
+            choice ??= unsortedList.FirstOrDefault();
             string word = choice.Split('-')[0];
             string num = choice.Split('-')[1];
             pattern = @"\b" + Regex.Escape(word) + @"\b";
@@ -597,15 +481,15 @@ namespace YoutubeDashboard
             VideoPlayer videoPlayer = BASE.GetComponent<VideoPlayer>();
             videoPlayer.url = videoUrl;
             videoPlayer.Play();
-
         }
-        public static Dictionary<string, object> ExtractVideoInfo(JToken videoData)
+
+        public Dictionary<string, object> ExtractVideoInfo(JToken videoData)
         {
-            var title = (string)videoData["title"]?["runs"]?[0]?["text"] ?? "No Title";
-            var viewsText = (string)videoData["viewCountText"]?["simpleText"] ?? "No Views";
+            var title = videoData["title"]?["runs"]?[0]?["text"] ?? "No Title";
+            var viewsText = (string) videoData["viewCountText"]?["simpleText"] ?? "No Views";
             var views = viewsText != "No Views" ? int.Parse(viewsText.Replace(",", "").Split()[0]) : 0;
-            var firstThumbnail = (string)videoData["thumbnail"]?["thumbnails"]?[0]?["url"] ?? "No Thumbnail";
-            var videoId = (string)videoData["videoId"] ?? "No Video ID";
+            var firstThumbnail = videoData["thumbnail"]?["thumbnails"]?[0]?["url"] ?? "No Thumbnail";
+            var videoId = videoData["videoId"] ?? "No Video ID";
             return new Dictionary<string, object>
             {
                 { "title", title },
@@ -614,21 +498,22 @@ namespace YoutubeDashboard
                 { "video_id", videoId }
             };
         }
-        public static void LoadAssets()
+
+        public void LoadAssets()
         {
-            AssetBundle bundle = LoadAssetBundle("YoutubeDashboard.yt");
+            AssetBundle bundle = LoadAssetBundle("YoutubeDashboard.Content.yt");
             YoutubeDashboard = bundle.LoadAsset<GameObject>("YT");
         }
 
-        public static void LoadButtons()
+        public void LoadButtons()
         {
             VButton1.AddComponent<VButton1>();
             VButton2.AddComponent<VButton2>();
             VButton3.AddComponent<VButton3>();
             VButton4.AddComponent<VButton4>();
             VButton5.AddComponent<VButton5>();
-            Forwardd.AddComponent<Forward>();
-            Backwardd.AddComponent<Backward>();
+            ForwardBTN.AddComponent<Forward>();
+            BackwardBTN.AddComponent<Backward>();
             PauseBTN.AddComponent<Pause>();
             PlayBTN.AddComponent<Play>();
             MuteBTN.AddComponent<Mute>();
@@ -643,8 +528,8 @@ namespace YoutubeDashboard
             VButton3.layer = 18;
             VButton4.layer = 18;
             VButton5.layer = 18;
-            Forwardd.layer = 18;
-            Backwardd.layer = 18;
+            ForwardBTN.layer = 18;
+            BackwardBTN.layer = 18;
             PauseBTN.layer = 18;
             PlayBTN.layer = 18;
             MuteBTN.layer = 18;
@@ -653,20 +538,19 @@ namespace YoutubeDashboard
             YTLogo.layer = 18;
         }
 
-        public static AssetBundle LoadAssetBundle(string path)
+        public AssetBundle LoadAssetBundle(string path)
         {
             Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path);
             AssetBundle bundle = AssetBundle.LoadFromStream(stream);
             stream.Close();
             return bundle;
         }
-        public static void LoadVideoTitles()
+
+        public void LoadVideoTitles()
         {
             Debug.Log("Index: " + YTVidIndex);
-            string FitTitle(string title)
-            {
-                return title.Length > 34 ? title.Substring(0, 31) + "..." : title;
-            }
+
+            static string FitTitle(string title) => title.Length > 34 ? title[..31] + "..." : title;
 
             VPH.GetComponent<TextMesh>().text = YTVideoNames.Count > YTVidIndex ? FitTitle(YTVideoNames[YTVidIndex]) : "";
             VPH2.GetComponent<TextMesh>().text = YTVideoNames.Count > YTVidIndex + 1 ? FitTitle(YTVideoNames[YTVidIndex + 1]) : "";
@@ -675,54 +559,21 @@ namespace YoutubeDashboard
             VPH5.GetComponent<TextMesh>().text = YTVideoNames.Count > YTVidIndex + 4 ? FitTitle(YTVideoNames[YTVidIndex + 4]) : "";
         }
 
-
-        void L(string msg)
-        {
-            UnityEngine.Debug.Log(msg);
-        }
-
-        void Update()
-        {
-            if (!PhotonNetwork.InRoom || inModded)
-            {
-                if (!doonce)
-                {
-                    instance.StartCoroutine(UpdateHome(true));
-                    YoutubeDashboard.gameObject.transform.localPosition = new Vector3(-73.6326f, 10.8116f, -84.9893f);
-                    YoutubeDashboard.gameObject.transform.rotation = Quaternion.Euler(0f, 337.7857f, 0f);
-                    YoutubeDashboard.gameObject.transform.localScale = new Vector3(3f, 3f, 3f);
-                    doonce = true;
-                    doOnce = false;
-                }
-
-            }
-            else if (!inModded && PhotonNetwork.InRoom)
-            {
-                if (!doOnce)
-                {
-                    instance.StartCoroutine(UpdateHome(true));
-                    YoutubeDashboard.transform.localPosition = new Vector3(0f, 0f, 0f);
-                    doonce = false;
-                    doOnce = true;
-                }
-            }
-        }
-
-        private static IEnumerator CDRun()
+        private IEnumerator CDRun()
         {
             CD = true;
             yield return new WaitForSeconds(2f);
             CD = false;
         }
 
-        private static IEnumerator VideoInteractableCDRun()
+        private IEnumerator VideoInteractableCDRun()
         {
             CD2 = true;
             yield return new WaitForSeconds(.7f);
             CD2 = false;
         }
 
-        public static IEnumerator UpdateHome(bool isHome)
+        public IEnumerator UpdateHome(bool isHome)
         {
             yield return new WaitForSeconds(0.35f);
             VButton1.SetActive(isHome);
@@ -738,20 +589,20 @@ namespace YoutubeDashboard
             VPH5.SetActive(isHome);
             YTPlayerTXT.SetActive(isHome);
             PFP.SetActive(isHome);
-            Forwardd.SetActive(isHome);
-            Backwardd.SetActive(isHome);
+            ForwardBTN.SetActive(isHome);
+            BackwardBTN.SetActive(isHome);
             B.SetActive(isHome);
             F.SetActive(isHome);
             MainTXT.SetActive(isHome);
-            divider.SetActive(isHome);
+            Divider.SetActive(isHome);
 
             PauseBTN.SetActive(!isHome);
             PlayBTN.SetActive(!isHome);
             MuteBTN.SetActive(!isHome);
             FastForward.SetActive(!isHome);
             Rewind.SetActive(!isHome);
-            pauseLogo.SetActive(!isHome);
-            playLogo.SetActive(!isHome);
+            PauseLogo.SetActive(!isHome);
+            PlayLogo.SetActive(!isHome);
             MuteLogo.SetActive(!isHome);
             FastForwardLogo.SetActive(!isHome);
             RewindLogo.SetActive(!isHome);
@@ -767,7 +618,7 @@ namespace YoutubeDashboard
             }
         }
 
-        public static void Mute()
+        public void Mute()
         {
             if (!CD2)
             {
@@ -780,112 +631,107 @@ namespace YoutubeDashboard
                 {
                     BASE.GetComponent<VideoPlayer>().SetDirectAudioMute(0, false);
                 }
-                instance.StartCoroutine(VideoInteractableCDRun());
+                StartCoroutine(VideoInteractableCDRun());
             }
         }
 
-        public static void FastForwardPress()
+        public void FastForwardPress()
         {
             if (!CD2)
             {
                 BASE.GetComponent<VideoPlayer>().time += 5f;
-                instance.StartCoroutine(VideoInteractableCDRun());
+                StartCoroutine(VideoInteractableCDRun());
             }
         }
 
-        public static void RewindPress()
+        public void RewindPress()
         {
             if (!CD2)
             {
                 BASE.GetComponent<VideoPlayer>().time -= 5f;
-                instance.StartCoroutine(VideoInteractableCDRun());
+                StartCoroutine(VideoInteractableCDRun());
             }
         }
 
-        public static void Pause()
+        public void Pause()
         {
             if (!CD2)
             {
                 BASE.GetComponent<AudioSource>().Pause();
                 BASE.GetComponent<VideoPlayer>().Pause();
-                instance.StartCoroutine(VideoInteractableCDRun());
+                StartCoroutine(VideoInteractableCDRun());
             }
         }
 
-        public static void Play()
+        public void Play()
         {
             if (!CD2)
             {
                 BASE.GetComponent<AudioSource>().Play();
                 BASE.GetComponent<VideoPlayer>().Play();
-                instance.StartCoroutine(VideoInteractableCDRun());
+                StartCoroutine(VideoInteractableCDRun());
             }
         }
 
-        public static void YTHit()
-        {
-            instance.StartCoroutine(UpdateHome(true));
-        }
+        public void YTHit() => StartCoroutine(UpdateHome(true));
 
-        public static void VideoButton1()
+        public void VideoButton1()
         {
             if (!CD && YTVidIndex < YTVideoIds.Count && !YTVideoIds[YTVidIndex].ToString().IsNullOrEmpty())
             {
                PlayVideo(YTVideoIds[YTVidIndex]);
-               instance.StartCoroutine(UpdateHome(false));
-               instance.StartCoroutine(CDRun());
+               StartCoroutine(UpdateHome(false));
+               StartCoroutine(CDRun());
             }
         }
 
-        public static void VideoButton2()
+        public void VideoButton2()
         {
             if (!CD && YTVidIndex + 1 < YTVideoIds.Count && !YTVideoIds[YTVidIndex + 1].ToString().IsNullOrEmpty())
             {
                 PlayVideo(YTVideoIds[YTVidIndex + 1]);
-                instance.StartCoroutine(UpdateHome(false));
-                instance.StartCoroutine(CDRun());
+                StartCoroutine(UpdateHome(false));
+                StartCoroutine(CDRun());
             }
         }
 
-        public static void VideoButton3()
+        public void VideoButton3()
         {
             if (!CD && YTVidIndex + 2 < YTVideoIds.Count && !YTVideoIds[YTVidIndex + 2].ToString().IsNullOrEmpty())
             {
                 PlayVideo(YTVideoIds[YTVidIndex + 2]);
-                instance.StartCoroutine(UpdateHome(false));
-                instance.StartCoroutine(CDRun());
+                StartCoroutine(UpdateHome(false));
+                StartCoroutine(CDRun());
             }
-            
         }
 
-        public static void VideoButton4()
+        public void VideoButton4()
         {
             if (!CD && YTVidIndex + 3 < YTVideoIds.Count && !YTVideoIds[YTVidIndex + 3].ToString().IsNullOrEmpty())
             {
                 PlayVideo(YTVideoIds[YTVidIndex + 3]);
-                instance.StartCoroutine(UpdateHome(false));
-                instance.StartCoroutine(CDRun());
+                StartCoroutine(UpdateHome(false));
+                StartCoroutine(CDRun());
             }
-           
         }
-        public static void VideoButton5()
+
+        public void VideoButton5()
         {
             if (!CD && YTVidIndex + 4 < YTVideoIds.Count && !YTVideoIds[YTVidIndex + 4].ToString().IsNullOrEmpty())
             {
                 PlayVideo(YTVideoIds[YTVidIndex + 4]);
-                instance.StartCoroutine(UpdateHome(false));
-                instance.StartCoroutine(CDRun());
+                StartCoroutine(UpdateHome(false));
+                StartCoroutine(CDRun());
             }
         }
 
-
-        public static void Forward()
+        public void Forward()
         {
             YTVidIndex += 5;
             LoadVideoTitles();
         }
 
-        public static void Backward()
+        public void Backward()
         {
             if (YTVidIndex > 0)
             {
@@ -893,6 +739,5 @@ namespace YoutubeDashboard
                 LoadVideoTitles();
             }
         }
-
     }
 }
