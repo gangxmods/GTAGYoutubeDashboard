@@ -160,7 +160,7 @@ namespace YoutubeDashboard
             //board
             YoutubeDashboard = Instantiate(YoutubeDashboard);
             YoutubeDashboard.SetActive(true);
-            YoutubeDashboard.gameObject.transform.localPosition = new Vector3(-73.6326f, 10.8116f, - 84.9893f);
+            YoutubeDashboard.gameObject.transform.localPosition = new Vector3(-73.6326f, 10.8116f, - 84.10f);
             YoutubeDashboard.gameObject.transform.rotation = Quaternion.Euler(0f, 337.7857f, 0f);
             YoutubeDashboard.gameObject.transform.localScale = new Vector3(3f, 3f, 3f);
 
